@@ -1,0 +1,7 @@
+backend/.env
+backend/gpt.py
+backend/main.py
+backend/mere.ipynb
+backend/mere.py
+backend/new.py
+backend/prompts*
