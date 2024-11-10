@@ -40,65 +40,33 @@ class UserQuery(BaseModel):
 class TimParkQuery(BaseModel):
     interogare_utilizator: str
 
-# Utility Functions
-
-def creează_prompt_extragere_engleza(input_utilizator):
-    prompt = f"""
-    Ești un asistent care extrage informații specifice din interogările utilizatorilor.
-
-    **Interogarea Utilizatorului:**
-    {input_utilizator}
-
-    **Instrucțiuni:**
-    Din interogarea de mai sus, extrage următoarele informații:
-    - **Categorie**: Selectează o categorie din lista de mai jos care se potrivește cel mai bine cu intenția utilizatorului (alege doar o singură opțiune):
-        - 'Property and Asset Management'
-        - 'Public Services and Utilities Management'
-        - 'Urban Planning and Development'
-        - 'Governance and Administration'
-        - 'Legal and Contracts'
-        - 'Financial and Budget Management'
-        - 'Education and Social Services'
-        - 'Market Regulation and Economics'
-        - 'Transportation and Infrastructure'
-        - 'Environmental and Energy Management'
-        - 'Health and Safety'
-        - 'Culture and Tourism'
-        - 'Human Resources'
-
-    **Formatul Răspunsului:**
-    Furnizează informațiile extrase în următorul format JSON:
-    ```json
-    {{
-      "category": "Categorie"
-    }}
-    ```
-    """
-    return prompt
 
 def creează_prompt_extragere_romana(input_utilizator):
     prompt = f"""
-    Ești un asistent care extrage informații specifice din interogările utilizatorilor.
+    Ești un asistent care analizează o interogare si care va mapa subiectul aceste interogari intr-o categorie din cele de mai jos
+    Obiectivul este de a sugera o categorie relevanta in care ar trebui sa se integreze subiectul interogarii date.
 
     **Interogarea Utilizatorului:**
     {input_utilizator}
 
     **Instrucțiuni:**
     Din interogarea de mai sus, extrage următoarele informații:
-    - **Categorie**: Selectează o categorie din lista de mai jos care se potrivește cel mai bine cu intenția utilizatorului (alege doar o singură opțiune):
-        - 'Managementul Proprietăților și Activelor'
-        - 'Managementul Serviciilor Publice și Utilităților'
-        - 'Planificare și Dezvoltare Urbană' 
-        - 'Guvernanță și Administrație'
-        - 'Legal și Contracte' 
-        - 'Management Financiar și Bugetar'
-        - 'Educație și Servicii Sociale' 
-        - 'Reglementarea Pieței și Economiei'
-        - 'Transport și Infrastructură' 
-        - 'Managementul Mediului și Energiei'
-        - 'Sănătate și Siguranță' 
-        - 'Cultură și Turism' 
-        - 'Resurse Umane'
+    - **Categorie**: Selectează o categorie din lista de mai jos care se potrivește cel mai bine cu intenția utilizatorului, folosește descrierea fiecărei categorii ca ghid pentru a identifica cea mai potrivită categorie, alege doar o singură opțiune:
+        - 'Managementul Proprietăților și Activelor' - Decizii care implică administrarea, întreținerea sau modificarea proprietăților și bunurilor publice.
+        - 'Managementul Serviciilor Publice și Utilităților' - Hotărâri referitoare la servicii publice esențiale, precum apă, energie, colectarea deșeurilor etc.
+        - 'Planificare și Dezvoltare Urbană' - Măsuri pentru dezvoltarea urbanistică, inclusiv planuri de construcție și zonare.
+        - 'Guvernanță și Administrație' - Decizii privind organizarea, reglementarea și funcționarea administrației publice locale.
+        - 'Legal și Contracte' - Aspecte juridice și contractuale, inclusiv litigii și reglementări.
+        - 'Management Financiar și Bugetar' - Hotărâri privind bugetul și gestiunea financiară a resurselor publice.
+        - 'Educație și Servicii Sociale' - Decizii în domeniul educației, sănătății, și al serviciilor sociale.
+        - 'Reglementarea Pieței și Economiei' - Măsuri pentru reglementarea pieței, economiei locale și comerciale.
+        - 'Transport și Infrastructură' - Hotărâri legate de transport public, drumuri și infrastructura locală.
+        - 'Managementul Mediului și Energiei' - Decizii referitoare la protecția mediului, sustenabilitate și energie.
+        - 'Sănătate și Siguranță' - Hotărâri legate de sănătatea publică și siguranța cetățenilor.
+        - 'Cultură și Turism' - Inițiative care sprijină cultura, arta, și turismul.
+        - 'Resurse Umane' - Aspecte legate de personalul administrației publice.
+        - 'Sistem de parcare, Timpark' - Decizii privind reglementarea și administrarea sistemului de parcari Timpark.
+        - 'Reabilitare Blocuri' - Hotărâri privind proiectele de reabilitare a blocurilor de locuințe.
 
     **Formatul Răspunsului:**
     Furnizează informațiile extrase în următorul format JSON:
@@ -109,6 +77,7 @@ def creează_prompt_extragere_romana(input_utilizator):
     ```
     """
     return prompt
+
 
 def obține_informații_extrase(prompt):
     response = openai.ChatCompletion.create(
@@ -137,29 +106,44 @@ def interoghează_date(nume_categorie, path_df):
     df_filtrat = df[df['general_categories'] == nume_categorie]
     return df_filtrat['gpt_description']
 
-def creează_prompt_final(interogare_utilizator, text_rezultat, n=3):
-    prompt = f"""Ești un asistent util.
+def interoghează_date_gen(nume_categorie, path_df):
+    df = pd.read_csv(path_df)
+    
+    df_filtrat = df[df['general_categories'] == nume_categorie]
+    rezultate_text = df_filtrat['gpt_description']
+    lista_hcl_categorie = df_filtrat['hcl_id']
+    # print(rezultate_text)
+    sorted_hcl = lista_hcl_categorie.sort_values(
+    key=lambda x: x.str.split('/').apply(lambda y: (int(y[1]), int(y[0]))),
+    ascending=False
+    )
+    return rezultate_text, sorted_hcl
 
-    Utilizatorul a întrebat: "{interogare_utilizator}"
+def creează_prompt_final(interogare_utilizator, text_rezultat, n=2):
+    prompt = f"""Ești un asistent care va răspunde la o întrebare folosind informații despre hotărâri ale consiliului local (HCL), furnizate într-un format JSON cu câmpurile: "Categorie", "Explicație", "Rezumat".
 
-    Pe baza analizei datelor, iată concluziile: {text_rezultat}
+    **Întrebare utilizator**: "{interogare_utilizator}"
+
+    **Informații despre HCL-uri**: {text_rezultat}
 
     Te rog să furnizezi un răspuns detaliat și structurat la întrebarea utilizatorului folosind informațiile de mai sus.
 
-    Începe prin a rezuma întrebarea utilizatorului în propriile tale cuvinte.
-    Apoi, prezintă concluziile clar, folosind puncte de bullet sau paragrafe, după cum este adecvat.
-    Asigură-te că abordezi direct și complet întrebarea utilizatorului.
-    La final, pe baza descrierii care s-a potrivit cel mai bine pentru a răspunde la întrebarea utilizatorului, știind că concluziile au fost construite folosind acest format:
-    HCL [număr]/[an] Explicație: [explicație]; Rezumat: [rezumat]
-    fă o listă cu {n} exemple: HCL [număr]/[an] (astfel încât această listă să servească drept mod de a verifica dacă informațiile oferite sunt corecte sau nu).
+    Instrucțiuni pentru răspuns:
+    1. **Rezumați întrebarea** în propriile tale cuvinte.
+    2. **Prezentați un răspuns structurat și detaliat**, concentrându-vă pe ordine cronologică, cu accent pe hotărârile recente (anul 2024 și ulterior).
+    3. **Formulați concluziile** clar și concis, folosind puncte de bullet sau paragrafe, abordând complet întrebarea utilizatorului.
+    4. **La final**, listați cele mai relevante {n} exemple de HCL-uri în formatul:  
+       - HCL: nr.[nr]/[an] si un json: "Categorie", "Explicație", "Rezumat".
+
+    Această listă va ajuta la verificarea corectitudinii informațiilor oferite.
     """
     return prompt
 
 # New Utility Functions for TimPark
 
-def creează_prompt_final_timpark(interogare_utilizator, text_rezultat, n=2):
+def creează_prompt_final_timpark(interogare_utilizator, text_rezultat, n=3):
     prompt = f"""
-    Ești un asistent care va răspunde la o întrebare folosind informații despre hotărâri ale consiliului local (HCL), furnizate într-un format JSON cu câmpurile: "Titlu", "Explicație", "Referințe HCL Anterioare", "Rezumat".
+    Ești un asistent care va răspunde la o întrebare folosind informații despre hotărâri ale consiliului local (HCL), furnizate într-un format 'HCL: nr.[nr]/[an]','Articole:','Motivatie:'
 
     **Întrebare utilizator**: "{interogare_utilizator}"
     
@@ -170,22 +154,20 @@ def creează_prompt_final_timpark(interogare_utilizator, text_rezultat, n=2):
     2. **Prezentați un răspuns structurat și detaliat**, concentrându-vă pe ordine cronologică, cu accent pe hotărârile recente (anul 2024 și ulterior).
     3. **Formulați concluziile** clar și concis, folosind puncte de bullet sau paragrafe, abordând complet întrebarea utilizatorului.
     4. **La final**, listați cele mai relevante {n} exemple de HCL-uri în formatul:  
-       - HCL: nr.[nr]/[an] si un json: "Titlu", "Explicație"
+       - HCL: nr.[nr]/[an]
 
     Această listă va ajuta la verificarea corectitudinii informațiilor oferite.
     """
     return prompt
-
-
 # Existing Endpoint
 
 @app.post("/extrage_informatii/")
 async def extrage_informatii(query: UserQuery):
     interogare_utilizator = query.interogare_utilizator
-    english = query.english
+   
 
-    path_df = 'all_hcl_general_categories_and_summary.csv' if english else 'all_hcl_general_categories_and_summary_romanian.csv'
-    prompt = creează_prompt_extragere_engleza(interogare_utilizator) if english else creează_prompt_extragere_romana(interogare_utilizator)
+    path_df = 'all_summarized_hcl_gpt_desc_added_with_general_categ.csv'
+    prompt = creează_prompt_extragere_romana(interogare_utilizator)
     
     text_răspuns = obține_informații_extrase(prompt)
     date_extrase = procesează_răspunsul(text_răspuns)
@@ -193,15 +175,18 @@ async def extrage_informatii(query: UserQuery):
     if date_extrase is None or 'category' not in date_extrase:
         raise HTTPException(status_code=400, detail="Nu s-a putut extrage categoria. Verifică interogarea și încearcă din nou.")
     
-    rezultate_text = interoghează_date(date_extrase['category'], path_df)
-    n_rezultate = 5
-    rezultate_text = rezultate_text.head(n_rezultate).tolist()
+    rezultate_text,sorted_hcl = interoghează_date_gen(date_extrase['category'], path_df)
+    rezultate_text = rezultate_text.tolist()
     rezultate_concatenate = "\n\n".join(rezultate_text)
-    prompt_final = creează_prompt_final(interogare_utilizator, rezultate_concatenate, n=3)
-    răspuns_final = obține_informații_extrase(prompt_final)
+    prompt_final = creează_prompt_final(interogare_utilizator, rezultate_concatenate, n=2)
 
-    raspuns_formatat = formatare_raspuns(răspuns_final)
-    return {"raspuns_final": raspuns_formatat}
+    răspuns_final = obține_informații_extrase(prompt_final)
+    
+    răspuns_final = "**Categorie:**:" + date_extrase['category'] + "\n"+"**HCL-uri care apartin Categoriei:**" + "\n" + sorted_hcl.head(5).to_string(index=False)+ "\n" + răspuns_final +"\n"
+    return {
+        "raspuns_final": răspuns_final
+    }
+
 
 # New Endpoint for TimPark Information Extraction
 
@@ -210,7 +195,7 @@ async def extrage_timpark_informatii(query: TimParkQuery):
     interogare_utilizator = query.interogare_utilizator
 
     # Define the path to the TimPark-specific CSV
-    path_df = 'hcl_timpark_json_generated_with_gpt_gpt_desc_added.csv'
+    path_df = 'all_hcl_timpark_with_articole_motivatie_original_as_gpt_desc.csv'
 
     # Load the TimPark CSV
     if not os.path.exists(path_df):
@@ -226,35 +211,9 @@ async def extrage_timpark_informatii(query: TimParkQuery):
     prompt_final = creează_prompt_final_timpark(interogare_utilizator, rezultate_concatenate, n=2)
     răspuns_final = obține_informații_extrase(prompt_final)
 
-    raspuns_formatat = formatare_raspuns(răspuns_final)
-    return {"raspuns_final": raspuns_formatat}
+    return {"raspuns_final": răspuns_final}
 
 import re
-
-def formatare_raspuns(text_raspuns: str) -> str:
-    """
-    Formatează textul răspunsului astfel încât fiecare secțiune
-    începută și încheiată cu '**' să fie într-un paragraf nou,
-    separate printr-un rând liber.
-    
-    Args:
-        text_raspuns (str): Textul răspunsului original.
-    
-    Returns:
-        str: Textul răspunsului formatat.
-    """
-    # Definește un pattern pentru a găsi secțiunile marcate cu **
-    pattern = r'(\*\*[^*]+\*\*:)'
-    
-    # Adaugă două rânduri libere înainte de fiecare secțiune
-    text_formatat = re.sub(pattern, r'\n\n\1', text_raspuns)
-    
-    # Elimină eventualele rânduri libere de la început
-    text_formatat = text_formatat.lstrip('\n')
-    
-    return text_formatat
-
-
 
 
 # Main entry point to run the server directly from code

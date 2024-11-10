@@ -1,6 +1,7 @@
 // src/TimparkHCLPage.tsx
 import React, { useEffect, useState } from "react";
 import { FiMoon, FiSend, FiSun } from "react-icons/fi";
+import ReactMarkdown from "react-markdown";
 
 const TimparkHCLPage: React.FC = () => {
   const [prompt, setPrompt] = useState<string>("");
@@ -88,7 +89,7 @@ const TimparkHCLPage: React.FC = () => {
       {/* Main Content */}
       <div className="flex flex-grow">
         {/* Left Column */}
-        <div className="w-1/2 p-6 bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white flex flex-col">
+        <div className="w-1/2 p-6 bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white flex flex-col min-h-full">
           <h2 className="text-3xl font-semibold mb-4">Enter Prompt</h2>
           <textarea
             className="flex-grow p-4 rounded-md bg-white text-black resize-none mb-4 focus:outline-none focus:ring-2 focus:ring-blue-300"
@@ -106,15 +107,20 @@ const TimparkHCLPage: React.FC = () => {
         </div>
 
         {/* Right Column */}
-        <div className="w-1/2 p-6 bg-gray-100 dark:bg-gray-800 overflow-auto">
+        <div className="w-1/2 p-6 bg-gray-100 dark:bg-gray-800 overflow-y-auto overflow-x-hidden min-h-full">
           <h2 className="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
             Response
           </h2>
           <div
-            className="bg-white dark:bg-gray-700 p-6 rounded-md shadow-md transition duration-500 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
-            style={{ color: darkMode ? "#f0f0f0" : "#333" }}
-            dangerouslySetInnerHTML={{ __html: response }}
-          ></div>
+            className="bg-white dark:bg-gray-700 p-6 rounded-md shadow-md transition duration-500 ease-in-out transform hover:-translate-y-1 hover:shadow-lg max-h-72 overflow-y-auto whitespace-pre-wrap"
+            style={{
+              color: darkMode ? "#f0f0f0" : "#333",
+              height: "80vh",
+              paddingBottom: "64vh",
+            }}
+          >
+            <ReactMarkdown className="markdown">{response}</ReactMarkdown>
+          </div>
         </div>
       </div>
 
