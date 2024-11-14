@@ -1,14 +1,13 @@
-// src/LlamaChatPage.tsx
 import React, { useEffect, useState } from "react";
 import { FiMoon, FiSend, FiSun } from "react-icons/fi";
 import ReactMarkdown from "react-markdown";
+import MyImage from "../assets/UPT.png"; // Adjust the path as needed
 
 const LlamaChatPage: React.FC = () => {
   const [prompt, setPrompt] = useState<string>("");
   const [response, setResponse] = useState<string>("");
-  // const [category, setCategory] = useState<string>("");
   const [darkMode, setDarkMode] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false); // New loading state
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -19,8 +18,8 @@ const LlamaChatPage: React.FC = () => {
   }, [darkMode]);
 
   const handleSubmit = async () => {
-    setLoading(true); // Set loading to true when submit is clicked
-    setResponse(""); // Clear previous response
+    setLoading(true);
+    setResponse("");
 
     try {
       const res = await fetch("http://localhost:8003/extrage_informatii/", {
@@ -39,20 +38,17 @@ const LlamaChatPage: React.FC = () => {
       }
 
       const data = await res.json();
-      setResponse(data.raspuns_final); // Format response, with a fallback if undefined
-      // setCategory(data.category);
-      console.log(data);
+      setResponse(data.raspuns_final);
     } catch (error) {
       console.error("Error:", error);
       setResponse("Error occurred while fetching response");
     } finally {
-      setLoading(false); // Set loading to false once the fetch is complete
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 relative">
-      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="flex flex-col items-center space-y-4">
@@ -64,7 +60,6 @@ const LlamaChatPage: React.FC = () => {
         </div>
       )}
 
-      {/* Navigation Bar */}
       <nav className="bg-transparent">
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -85,9 +80,7 @@ const LlamaChatPage: React.FC = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
       <div className="flex flex-grow">
-        {/* Left Column */}
         <div className="w-1/2 p-6 bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white flex flex-col min-h-full">
           <h2 className="text-3xl font-semibold mb-4">Enter Prompt</h2>
           <textarea
@@ -105,7 +98,6 @@ const LlamaChatPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Right Column */}
         <div className="w-1/2 p-6 bg-gray-100 dark:bg-gray-800 overflow-y-auto overflow-x-hidden min-h-full">
           <h2 className="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
             Response
@@ -118,21 +110,24 @@ const LlamaChatPage: React.FC = () => {
               paddingBottom: "64vh",
             }}
           >
-            {/* <ReactMarkdown>**Category:**</ReactMarkdown>
-            <pre>{category}</pre> */}
             <ReactMarkdown className="markdown">{response}</ReactMarkdown>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-transparent p-4">
         <div className="max-w-full mx-auto flex justify-center space-x-6">
           {/* Footer content or social media icons */}
         </div>
       </footer>
 
-      {/* Loader Styles */}
+      {/* Bottom-right corner image */}
+      <img
+        src={MyImage}
+        alt="Description of image"
+        className="absolute bottom-5 right-4 w-48 h-30"
+      />
+
       <style>{`
         .loader {
           border: 8px solid rgba(255, 255, 255, 0.3);

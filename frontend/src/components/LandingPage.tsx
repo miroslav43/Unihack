@@ -1,6 +1,6 @@
-// src/components/LandingPage.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import MyImage from "../assets/UPT.png"; // Adjust the path as needed
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -13,8 +13,7 @@ const LandingPage: React.FC = () => {
         </h1>
         <div>
           <button
-            onClick={() => navigate("/general")}
-            className="w-64 py-4 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition duration-300"
+            onClick={() => navigate("/general")} className="w-64 py-4 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition duration-300"
           >
             General HCL
           </button>
@@ -25,6 +24,12 @@ const LandingPage: React.FC = () => {
             Timpark HCL
           </button>
         </div>
+        {/* Add your image below the buttons */}
+        <img
+          src={MyImage}
+          alt="Description of image"
+          className="mt-6 mx-auto w-64 h-64 object-contain"
+        />
       </div>
     </div>
   );

@@ -8,19 +8,18 @@ from dotenv import load_dotenv
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
-# Initialize FastAPI
+
 app = FastAPI()
 
-# Configure CORS
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    # Add more origins if necessary
+
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allows requests from specified origins
+    allow_origins=origins, 
     allow_credentials=True,
     allow_methods=["*"],    # Allows all HTTP methods
     allow_headers=["*"],    # Allows all headers
@@ -195,7 +194,7 @@ async def extrage_timpark_informatii(query: TimParkQuery):
     interogare_utilizator = query.interogare_utilizator
 
     # Define the path to the TimPark-specific CSV
-    path_df = 'all_hcl_timpark_with_articole_motivatie_original_as_gpt_desc.csv'
+    path_df = 'all_hcl_timpark_with_articole_motivatie_original_as_gpt_desc_refined.csv'
 
     # Load the TimPark CSV
     if not os.path.exists(path_df):

@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { FiMoon, FiSend, FiSun } from "react-icons/fi";
 import ReactMarkdown from "react-markdown";
+import MyImage from "../assets/UPT.png"; 
+
 
 const TimparkHCLPage: React.FC = () => {
   const [prompt, setPrompt] = useState<string>("");
@@ -25,7 +27,6 @@ const TimparkHCLPage: React.FC = () => {
       const res = await fetch(
         "http://localhost:8003/extrage_timpark_informatii/",
         {
-          // New API endpoint
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -131,7 +132,12 @@ const TimparkHCLPage: React.FC = () => {
         </div>
       </footer>
 
-      {/* Loader Styles */}
+      <img
+        src={MyImage}
+        alt="Description of image"
+        className="absolute bottom-5 right-4 w-48 h-30"
+      />
+
       <style>{`
         .loader {
           border: 8px solid rgba(255, 255, 255, 0.3);
